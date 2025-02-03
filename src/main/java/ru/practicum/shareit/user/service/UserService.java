@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,32 +49,40 @@ public class UserService {
         log.info("Обновление пользователя.");
         User user = UserMapper.mapToUser(userDto);
         checkId(id);
-        checkEmail(user);
-        if (userRepository.getUserById(id).isEmpty()) {
+
+        Optional<User> oldUserOpt = userRepository.getUserById(id);
+
+        if (oldUserOpt.isEmpty()) {
             throw new NotFoundException("Пользователь с email = " + user.getEmail() + " не найден");
         }
+
+        String newEmail = user.getEmail();
+
+        if (newEmail != null) {
+            String oldEmail = oldUserOpt.get().getEmail();
+
+            if (oldEmail != null && !user.getEmail().equals(oldEmail)) {
+                checkEmail(user);
+            }
+        }
+
         user = userRepository.update(user, id);
 
         return UserMapper.mapToUserDto(user);
     }
 
-    public Collection<UserDto> deleteAllUsers() {
+    public void deleteAllUsers() {
         log.info("Удаление всех пользователей.");
         userRepository.deleteAllUsers();
-        return findAllUsers();
     }
 
-    public UserDto deleteUser(Long id) {
+    public void deleteUser(Long id) {
         log.info("Удаление пользователя.");
 
         checkId(id);
 
         userRepository.deleteUser(id);
-
-        return userRepository.getUserById(id)
-                .map(UserMapper::mapToUserDto).orElse(null);
     }
-
 
     private void checkId(Long id) {
         if (id == null) {

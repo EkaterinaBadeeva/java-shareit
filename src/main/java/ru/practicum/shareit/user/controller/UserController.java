@@ -50,14 +50,14 @@ public class UserController {
     //DELETE /users
     // удалить всех пользователей
     @DeleteMapping
-    public Collection<UserDto> deleteAllUsers() {
-        return userService.deleteAllUsers();
+    public void deleteAllUsers() {
+        userService.deleteAllUsers();
     }
 
     //DELETE /users/{id}
     // удалить пользователя по id
     @DeleteMapping("/{id}")
-    public UserDto deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id);
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 }

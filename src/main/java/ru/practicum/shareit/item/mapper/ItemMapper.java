@@ -21,14 +21,15 @@ public class ItemMapper {
     }
 
     public static Item mapToItem(ItemDto itemDto) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .available(itemDto.getAvailable())
-                .owner(itemDto.getOwner())
-                .request(itemDto.getRequest())
-                .reviews(itemDto.getReviews())
-                .build();
+        Item item = new Item();
+        item.setId(itemDto.getId());
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setOwner(itemDto.getOwner());
+        item.setRequest(itemDto.getRequest());
+        item.setReviews(itemDto.getReviews());
+
+        return item;
     }
 }

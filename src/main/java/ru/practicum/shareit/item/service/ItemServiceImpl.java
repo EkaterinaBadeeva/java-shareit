@@ -28,6 +28,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> getAllItemsOfUser(Long userId) {
         log.info("Получение списка всех вещей.");
+        checkId(userId);
+        checkUser(userId);
+
         return itemRepository.getAllItemsOfUser(userId).stream()
                 .map(ItemMapper::mapToItemDto)
                 .collect(Collectors.toList());
@@ -38,6 +41,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Получение вещи по Id.");
         checkId(id);
         checkId(userId);
+        checkUser(userId);
 
         return itemRepository.getItemById(id)
                 .map(ItemMapper::mapToItemDto)
@@ -49,10 +53,10 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto create(ItemDto itemDto, Long userId) {
         log.info("Добавление новой вещи.");
         checkId(userId);
+        checkUser(userId);
 
         Item item = ItemMapper.mapToItem(itemDto);
         item.setOwner(UserMapper.mapToUser(userService.findUserById(userId)));
-        checkConditions(item, userId);
         item = itemRepository.create(item, userId);
         checkId(item.getId());
         return ItemMapper.mapToItemDto(item);
@@ -64,6 +68,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Редактирование вещи.");
         checkId(itemId);
         checkId(userId);
+        checkUser(userId);
 
         Item oldItem = ItemMapper.mapToItem(getItemById(itemId, userId));
 
@@ -80,8 +85,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> findItem(String text) {
         log.info("Поиск вещи потенциальным арендатором");
-        Collection<Item> items = itemRepository.getAllItems();
-        Collection<Item> findingItems = new ArrayList<>();
 
         if (text == null) {
             log.warn("Текст поиска должен быть указан.");
@@ -91,6 +94,9 @@ public class ItemServiceImpl implements ItemService {
         if (text.isEmpty()) {
             return List.of();
         }
+
+        Collection<Item> items = itemRepository.getAllItems();
+        Collection<Item> findingItems = new ArrayList<>();
 
         items.stream().filter(item -> item.getAvailable() && (item.getName().toUpperCase().contains(text.toUpperCase()) ||
                 item.getDescription().toUpperCase().contains(text.toUpperCase()))).forEach(item -> {
@@ -110,27 +116,10 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private void checkConditions(Item item, Long userId) {
-
-        if (item.getName().isEmpty()) {
-            log.warn("Задано пустое имя вещи.");
-            throw new ValidationException("Задано пустое имя вещи");
-        }
-
-        if (item.getAvailable() == null) {
-            log.warn("Задан пустой статус о том, доступна или нет вещь для аренды.");
-            throw new ValidationException("Задан пустой статус о том, доступна или нет вещь для аренды");
-        }
-
-        if (item.getOwner() == null) {
-            log.warn("Задано пустое поле - владелец вещи.");
-            throw new ValidationException("Задано пустое поле - владелец вещи");
-        }
-
-        if (!item.getOwner().getId().equals(userId)) {
-            log.warn("Неверно указан владалец вещи.");
-            throw new ValidationException("Неверно указан владалец вещи");
+    private void checkUser(Long userId) {
+        if (userService.findUserById(userId) == null) {
+            log.warn("Неверно указан Id пользователя.");
+            throw new NotFoundException("Пользователь с Id = " + userId + " не найден");
         }
     }
-
 }
