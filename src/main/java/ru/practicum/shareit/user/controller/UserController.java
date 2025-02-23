@@ -6,11 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.util.Collection;
-
-/**
- * TODO Sprint add-controllers.
- */
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/users")
@@ -21,7 +17,7 @@ public class UserController {
     //GET /users
     // получить всех пользователей
     @GetMapping
-    public Collection<UserDto> findAllUsers() {
+    public List<UserDto> findAllUsers() {
         return userService.findAllUsers();
     }
 
@@ -58,6 +54,6 @@ public class UserController {
     // удалить пользователя по id
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userService.deleteUserById(id);
     }
 }
