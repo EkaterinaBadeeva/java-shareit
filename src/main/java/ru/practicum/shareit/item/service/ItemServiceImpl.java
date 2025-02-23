@@ -80,10 +80,8 @@ public class ItemServiceImpl implements ItemService {
         Optional<Item> itemOpt = itemRepository.findById(id);
 
         if (itemOpt.isPresent() && itemOpt.get().getOwner().getId().equals(userId)) {
-            Optional<Booking> next = bookingRepository.findFirstBookingByItemIdAndStartIsAfterOrderByStart
-                    (id, LocalDateTime.now());
-            Optional<Booking> last = bookingRepository.findFirstBookingByItemIdAndEndIsBeforeOrderByEndDesc
-                    (id, LocalDateTime.now());
+            Optional<Booking> next = bookingRepository.findFirstBookingByItemIdAndStartIsAfterOrderByStart(id, LocalDateTime.now());
+            Optional<Booking> last = bookingRepository.findFirstBookingByItemIdAndEndIsBeforeOrderByEndDesc(id, LocalDateTime.now());
 
             if (next.isPresent() || last.isPresent()) {
                 if (next.isPresent()) {

@@ -127,17 +127,13 @@ public class BookingServiceImpl implements BookingService {
 
             case WAITING:
                 bookings =
-                        bookingRepository.findAllBookingsByBookerIdAndStatusOrderByEndDesc
-                                (userId, StatusOfBooking.WAITING);
+                        bookingRepository.findAllBookingsByBookerIdAndStatusOrderByEndDesc(userId, StatusOfBooking.WAITING);
                 break;
 
             case REJECTED:
                 bookings =
-                        bookingRepository.findAllBookingsByBookerIdAndStatusOrderByEndDesc
-                                (userId, StatusOfBooking.REJECTED);
+                        bookingRepository.findAllBookingsByBookerIdAndStatusOrderByEndDesc(userId, StatusOfBooking.REJECTED);
                 break;
-
-
         }
 
         return bookings.stream()
@@ -173,14 +169,12 @@ public class BookingServiceImpl implements BookingService {
 
             case WAITING:
                 bookings =
-                        bookingRepository.findAllBookingsByItemOwnerIdAndStatusOrderByEndDesc
-                                (userId, StatusOfBooking.WAITING);
+                        bookingRepository.findAllBookingsByItemOwnerIdAndStatusOrderByEndDesc(userId, StatusOfBooking.WAITING);
                 break;
 
             case REJECTED:
                 bookings =
-                        bookingRepository.findAllBookingsByItemOwnerIdAndStatusOrderByEndDesc
-                                (userId, StatusOfBooking.REJECTED);
+                        bookingRepository.findAllBookingsByItemOwnerIdAndStatusOrderByEndDesc(userId, StatusOfBooking.REJECTED);
                 break;
         }
 

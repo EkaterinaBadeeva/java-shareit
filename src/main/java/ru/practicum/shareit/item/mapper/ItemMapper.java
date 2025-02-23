@@ -36,7 +36,7 @@ public class ItemMapper {
         return item;
     }
 
-    public static ItemWithBookingDto mapToItemWithBookingDto(Item item, List <BookingDtoShort> bookings, List<CommentDto> comments) {
+    public static ItemWithBookingDto mapToItemWithBookingDto(Item item, List<BookingDtoShort> bookings, List<CommentDto> comments) {
         return ItemWithBookingDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -48,6 +48,7 @@ public class ItemMapper {
                 .comments(comments)
                 .build();
     }
+
     public static ItemDto mapToItemWithCommentsDto(Item item, List<CommentDto> comments
                                                    ) {
         return ItemDto.builder()
@@ -60,6 +61,7 @@ public class ItemMapper {
                 .comments(comments)
                 .build();
     }
+
     public static ItemDto mapToItemWithCommentsAndBookingDto(Item item, List<CommentDto> comments,
                                                    BookingDtoShort lastBooking, BookingDtoShort nextBooking) {
         return ItemDto.builder()

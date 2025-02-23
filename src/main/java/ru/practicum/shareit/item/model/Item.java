@@ -11,7 +11,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "items")
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 public class Item {
     //id — уникальный идентификатор вещи
     @Id

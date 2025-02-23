@@ -11,7 +11,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "comments")
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 public class Comment {
     //id — уникальный идентификатор комментария о вещи
     @Id

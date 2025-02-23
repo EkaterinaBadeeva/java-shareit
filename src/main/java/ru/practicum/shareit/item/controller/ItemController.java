@@ -59,7 +59,7 @@ public class ItemController {
     //POST /items/{itemId}/comment
     // добавление комментария о вещи после аренды
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment (@Valid @RequestBody CommentDto commentDto ,
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
                         @PathVariable Long itemId,
                         @RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.createComment(commentDto, itemId, userId);
