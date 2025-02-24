@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -17,7 +18,7 @@ public class BookingDtoShort {
     LocalDateTime start;
 
     @NotNull(message = "Должны быть указаны дата и время конца бронирования")
-    @FutureOrPresent(message = "Дата и время конца бронирования должны быть указаны в текущем или будущем времени")
+    @Future(message = "Дата и время конца бронирования должны быть указаны в будущем времени")
     LocalDateTime end;
 
     @NotNull(message = "Должен быть указан id вещи, которую пользователь бронирует")

@@ -2,13 +2,12 @@ package ru.practicum.shareit.item.service;
 
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 
 import java.util.Collection;
 import java.util.Map;
 
 public interface ItemService {
-    Collection<ItemWithBookingDto> getAllItemsOfUser(Long userId);
+    Collection<ItemDto> getAllItemsOfUser(Long userId);
 
     ItemDto getItemById(Long id, Long userId);
 

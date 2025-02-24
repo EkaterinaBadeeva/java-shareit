@@ -38,15 +38,15 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto create(BookingDtoShort bookingDto, Long userId) {
         log.info("Добавление нового запроса на бронирование.");
         checkId(userId);
-        checkUser(userId);
 
         Booking booking = BookingMapper.mapToBookingShort(bookingDto);
+        checkDateOfBooking(booking);
         Item item = ItemMapper.mapToItem(itemService.getItemById(bookingDto.getItemId(), userId));
+        checkAvailableOfItem(item);
 
         booking.setBooker(UserMapper.mapToUser(userService.findUserById(userId)));
         booking.setItem(item);
         booking.setStatus(StatusOfBooking.WAITING);
-        checkDateOfBookingAndAvailableOfItem(booking);
 
         booking = bookingRepository.save(booking);
         checkId(booking.getId());
@@ -60,11 +60,10 @@ public class BookingServiceImpl implements BookingService {
         checkId(userId);
         checkUser(userId);
 
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Бронирование с id " + id + " не найдено"));
+        Booking booking = findBookingById(id);
 
         if (!(booking.getBooker().getId().equals(userId) ||
-                booking.getItem().getOwner().getId().equals(userId))) {
+                checkIsOwner(booking, userId))) {
             throw new ValidationException("Пользователь с id = "
                     + userId + " не является автором бронирования номер "
                     + id + ", либо владельцем вещи " + booking.getItem().getName());
@@ -80,19 +79,12 @@ public class BookingServiceImpl implements BookingService {
         checkId(bookingId);
         checkId(userId);
 
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
+        Booking booking = findBookingById(bookingId);
+        checkIsOwner(booking, userId);
 
-        if (!booking.getItem().getOwner().getId().equals(userId)) {
-            log.warn("Пользователь не является владельцем вещи.");
-            throw new ValidationException("Пользователь с Id = " + userId + " не является владельцем вещи " + booking.getItem().getName());
-        }
-
-        if (approved == Boolean.TRUE) {
+        if (approved) {
             booking.setStatus(StatusOfBooking.APPROVED);
-        }
-
-        if (approved == Boolean.FALSE) {
+        } else {
             booking.setStatus(StatusOfBooking.REJECTED);
         }
 
@@ -198,7 +190,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void checkDateOfBookingAndAvailableOfItem(Booking booking) {
+    private void checkDateOfBooking(Booking booking) {
         LocalDateTime start = booking.getStart();
         LocalDateTime end = booking.getEnd();
 
@@ -207,9 +199,25 @@ public class BookingServiceImpl implements BookingService {
         } else if (start.equals(end)) {
             throw new ValidationException("Дата и время начала бронирования равна дате и времени конца бронирования");
         }
+    }
 
-        if (!booking.getItem().getIsAvailable()) {
+    private void checkAvailableOfItem(Item item) {
+
+        if (!item.getIsAvailable()) {
             throw new ValidationException("Вещь не доступна для аренды");
         }
+    }
+
+    private Booking findBookingById(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
+    }
+
+    private Boolean checkIsOwner(Booking booking, Long userId) {
+        if (!booking.getItem().getOwner().getId().equals(userId)) {
+            log.warn("Пользователь не является владельцем вещи.");
+            throw new ValidationException("Пользователь с Id = " + userId + " не является владельцем вещи " + booking.getItem().getName());
+        }
+        return true;
     }
 }

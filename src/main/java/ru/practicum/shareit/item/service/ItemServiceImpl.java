@@ -8,13 +8,13 @@ import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.StatusOfBooking;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dao.CommentRepository;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -39,26 +39,58 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
 
     @Override
-    public Collection<ItemWithBookingDto> getAllItemsOfUser(Long userId) {
+    public Collection<ItemDto> getAllItemsOfUser(Long userId) {
         log.info("Получение списка всех вещей.");
         checkId(userId);
         checkUser(userId);
-        List<BookingDtoShort> bookings;
-        List<CommentDto> comments;
 
-        List<ItemWithBookingDto> itemsOfUser = new ArrayList<>();
+        List<ItemDto> itemsOfUser = new ArrayList<>();
+        List<Item> items = itemRepository.findAllItemsByOwnerId(userId);
 
-        for (Item item : itemRepository.findAllItemsByOwnerId(userId)) {
-            bookings = bookingRepository.findBookingsByItemId(item.getId()).stream()
-                    .map(BookingMapper::mapToBookingDtoShort)
-                    .toList();
-            comments = commentRepository.findCommentsByItemId(item.getId()).stream()
-                    .map(CommentMapper::mapToCommentDto)
-                    .toList();
+        List<Comment> comments = commentRepository.findCommentsByItemIn(items);
+        Map<Long, List<CommentDto>> commentOfItem = new HashMap<>();
 
-            ItemWithBookingDto itemDtoWithBookingDto = ItemMapper.mapToItemWithBookingDto(item, bookings, comments);
-            itemsOfUser.add(itemDtoWithBookingDto);
+        List<Booking> bookings = bookingRepository.findBookingsByItemInAndStatusOrderByStartDesc(items, StatusOfBooking.APPROVED);
+        Map<Long, List<BookingDtoShort>> bookingsOfItem = new HashMap<>();
+
+        List<CommentDto> commentsDto = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentsDto.add(CommentMapper.mapToCommentDto(comment));
+            commentOfItem.put(comment.getItem().getId(), commentsDto);
         }
+
+        List<BookingDtoShort> bookingDto = new ArrayList<>();
+        for (Booking booking : bookings) {
+            bookingDto.add(BookingMapper.mapToBookingDtoShort(booking));
+            bookingsOfItem.put(booking.getItem().getId(), bookingDto);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        for (Item item : items) {
+            BookingDtoShort nextBooking = null;
+            BookingDtoShort lastBooking = null;
+            List<BookingDtoShort> bookingsOfItemDto = bookingsOfItem.get(item.getId());
+
+            if (bookingsOfItemDto != null) {
+                for (BookingDtoShort booking : bookingsOfItemDto) {
+                    if (booking.getStart().isAfter(now)) {
+                        nextBooking = booking;
+                    }
+                    if (booking.getEnd().isBefore(now)) {
+                        lastBooking = booking;
+                        break;
+                    }
+                }
+            }
+            List<BookingDtoShort> listOfBookings = new ArrayList<>(List.of());
+            listOfBookings.add(nextBooking);
+            listOfBookings.add(lastBooking);
+
+            Long itemId = item.getId();
+            ItemDto itemDto = ItemMapper.mapToItemWithCommentsAndBookingDto(item, commentOfItem.get(itemId), lastBooking, nextBooking);
+            itemsOfUser.add(itemDto);
+        }
+
         return itemsOfUser;
     }
 
