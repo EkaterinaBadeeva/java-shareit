@@ -10,9 +10,10 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
+
 @Data
 @Builder
-public class ItemDto {
+public class ItemWithBookingDto {
     Long id;
 
     @NotNull(message = "Должно быть указано имя вещи")
@@ -27,8 +28,9 @@ public class ItemDto {
 
     User owner;
 
+    List<BookingDtoShort> bookings;
+
     ItemRequest request;
+
     List<CommentDto> comments;
-    BookingDtoShort lastBooking;
-    BookingDtoShort nextBooking;
 }
