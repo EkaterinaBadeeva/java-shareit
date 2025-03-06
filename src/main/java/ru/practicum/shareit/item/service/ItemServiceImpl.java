@@ -15,10 +15,13 @@ import ru.practicum.shareit.item.dao.CommentRepository;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithRequestDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dao.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -35,8 +38,10 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
 
+
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     public Collection<ItemDto> getAllItemsOfUser(Long userId) {
@@ -138,12 +143,19 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto create(ItemDto itemDto, Long userId) {
+    public ItemDto create(ItemWithRequestDto itemDto, Long userId) {
         log.info("Добавление новой вещи.");
         checkId(userId);
         checkUser(userId);
+        Long requestId = itemDto.getRequestId();
+        Optional<ItemRequest> requestOpt = Optional.empty();
 
-        Item item = ItemMapper.mapToItem(itemDto);
+        if (requestId != null) {
+            requestOpt = itemRequestRepository.findById(requestId);
+        }
+
+        Item item = ItemMapper.mapToItemWithRequest(itemDto, requestOpt.orElse(null));
+
         item.setOwner(UserMapper.mapToUser(userService.findUserById(userId)));
         item = itemRepository.save(item);
         checkId(item.getId());

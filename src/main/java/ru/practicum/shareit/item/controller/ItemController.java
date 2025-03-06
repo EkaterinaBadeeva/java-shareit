@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithRequestDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
@@ -34,7 +35,7 @@ public class ItemController {
     //POST /items
     // добавить вещь
     @PostMapping
-    public ItemDto create(@Valid @RequestBody ItemDto itemDto,
+    public ItemDto create(@Valid @RequestBody ItemWithRequestDto itemDto,
                           @RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.create(itemDto, userId);
     }

@@ -4,24 +4,22 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
+import ru.practicum.shareit.user.dto.UserWithOnlyNameDto;
 
 import java.time.Instant;
-
-/**
- * TODO Sprint add-item-requests.
- */
+import java.util.List;
 
 @Data
 @Builder
-public class ItemRequestDto {
-
+public class ItemRequestWithItemDto {
     Long id;
 
     @NotNull(message = "Должен быть указан текст запроса, содержащий описание требуемой вещи")
     @NotBlank(message = "Должен быть указан текст запроса, содержащий описание требуемой вещи")
     String description;
 
-    User requestor;
+    List<ItemForItemRequestDto> items;
+    UserWithOnlyNameDto requestor;
     Instant created;
 }

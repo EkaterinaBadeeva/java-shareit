@@ -34,7 +34,7 @@ public class ItemRequest {
     User requestor;
 
     //created — дата и время создания запроса
-    Instant created;
+    Instant created = Instant.now();
 
     @Override
     public boolean equals(Object o) {

@@ -4,17 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.booking.dto.BookingDtoShort;
-import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.model.User;
-
-import java.util.List;
-
 
 @Data
 @Builder
-public class ItemWithBookingDto {
-    Long id;
+public class ItemWithRequestDto {
 
     @NotNull(message = "Должно быть указано имя вещи")
     @NotBlank(message = "Должно быть указано имя вещи")
@@ -26,11 +19,5 @@ public class ItemWithBookingDto {
     @NotNull(message = "Должен быть указан статус о том, доступна или нет вещь для аренды")
     Boolean available;
 
-    User owner;
-
-    List<BookingDtoShort> bookings;
-
-    ItemRequest request;
-
-    List<CommentDto> comments;
+    Long requestId;
 }

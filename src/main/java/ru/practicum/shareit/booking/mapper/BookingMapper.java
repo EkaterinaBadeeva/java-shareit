@@ -34,7 +34,6 @@ public class BookingMapper {
 
     public static Booking mapToBookingShort(BookingDtoShort bookingDto) {
         Booking booking = new Booking();
-
         booking.setStart(bookingDto.getStart());
         booking.setEnd(bookingDto.getEnd());
         booking.setStatus(bookingDto.getStatus());

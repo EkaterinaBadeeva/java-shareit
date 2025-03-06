@@ -5,8 +5,11 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingDto;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
+
+import ru.practicum.shareit.item.dto.ItemWithRequestDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
@@ -36,21 +39,19 @@ public class ItemMapper {
         return item;
     }
 
-    public static ItemWithBookingDto mapToItemWithBookingDto(Item item, List<BookingDtoShort> bookings, List<CommentDto> comments) {
-        return ItemWithBookingDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getIsAvailable())
-                .owner(item.getOwner())
-                .bookings(bookings)
-                .request(item.getRequest())
-                .comments(comments)
-                .build();
+    public static Item mapToItemWithRequest(ItemWithRequestDto itemDto, ItemRequest request) {
+        Item item = new Item();
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setIsAvailable(itemDto.getAvailable());
+        item.setRequest(request);
+
+        return item;
     }
 
+
     public static ItemDto mapToItemWithCommentsDto(Item item, List<CommentDto> comments
-                                                   ) {
+    ) {
         return ItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -63,7 +64,7 @@ public class ItemMapper {
     }
 
     public static ItemDto mapToItemWithCommentsAndBookingDto(Item item, List<CommentDto> comments,
-                                                   BookingDtoShort lastBooking, BookingDtoShort nextBooking) {
+                                                             BookingDtoShort lastBooking, BookingDtoShort nextBooking) {
         return ItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -74,6 +75,14 @@ public class ItemMapper {
                 .comments(comments)
                 .lastBooking(lastBooking)
                 .nextBooking(nextBooking)
+                .build();
+    }
+
+    public static ItemForItemRequestDto mapItemForItemRequestDto(Item item) {
+        return ItemForItemRequestDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .owner(item.getOwner())
                 .build();
     }
 }
