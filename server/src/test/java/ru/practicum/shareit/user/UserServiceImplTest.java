@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.CommonException;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -139,5 +140,15 @@ class UserServiceImplTest {
         //check
         assertThatThrownBy(() -> userService.update(user,user1.getId()))
                 .isInstanceOf(CommonException.class);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenIdNotFind() {
+        //prepare
+        userService.create(user1);
+
+        //check
+        assertThatThrownBy(() -> userService.deleteUserById(null))
+                .isInstanceOf(ValidationException.class);
     }
 }

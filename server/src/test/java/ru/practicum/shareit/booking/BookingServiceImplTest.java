@@ -27,8 +27,7 @@ import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -146,6 +145,120 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void shouldFindBookingByBookerWhenStateCurrent() {
+        //prepare
+        UserDto userDto2 = UserDto.builder().id(2L).name("test2").email("test2@test.ru").build();
+        User user2 = UserMapper.mapToUser(userService.create(userDto2));
+        BookingDto createdBooking = bookingService.create(booking1, user2.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByBooker(State.CURRENT, user2.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(1);
+        assertTrue(foundBookings.contains(createdBooking));
+    }
+
+    @Test
+    void shouldFindBookingByBookerWhenStatePast() {
+        //prepare
+        UserDto userDto2 = UserDto.builder().id(2L).name("test2").email("test2@test.ru").build();
+        User user2 = UserMapper.mapToUser(userService.create(userDto2));
+        BookingDto createdBooking = bookingService.create(booking1, user2.getId());
+
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(10))
+                .end(LocalDateTime.now().minusHours(1))
+                .itemId(item.getId())
+                .status(StatusOfBooking.APPROVED)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking, user2.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByBooker(State.PAST, user2.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(1);
+        assertTrue(foundBookings.contains(createdBooking2));
+    }
+
+    @Test
+    void shouldFindBookingByBookerWhenStateFuture() {
+        //prepare
+        UserDto userDto2 = UserDto.builder().id(2L).name("test2").email("test2@test.ru").build();
+        User user2 = UserMapper.mapToUser(userService.create(userDto2));
+        BookingDto createdBooking = bookingService.create(booking1, user2.getId());
+
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(10))
+                .end(LocalDateTime.now().minusHours(1))
+                .itemId(item.getId())
+                .status(StatusOfBooking.APPROVED)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking, user2.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByBooker(State.FUTURE, user2.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(1);
+        assertTrue(foundBookings.contains(createdBooking));
+    }
+
+    @Test
+    void shouldFindBookingByBookerWhenStateWaiting() {
+        //prepare
+        UserDto userDto2 = UserDto.builder().id(2L).name("test2").email("test2@test.ru").build();
+        User user2 = UserMapper.mapToUser(userService.create(userDto2));
+        BookingDto createdBooking = bookingService.create(booking1, user2.getId());
+
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(10))
+                .end(LocalDateTime.now().minusHours(1))
+                .itemId(item.getId())
+                .status(StatusOfBooking.WAITING)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking, user2.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByBooker(State.WAITING, user2.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(2);
+        assertTrue(foundBookings.contains(createdBooking));
+        assertTrue(foundBookings.contains(createdBooking2));
+    }
+
+    @Test
+    void shouldFindBookingByBookerWhenStateRejected() {
+        //prepare
+        UserDto userDto2 = UserDto.builder().id(2L).name("test2").email("test2@test.ru").build();
+        User user2 = UserMapper.mapToUser(userService.create(userDto2));
+        BookingDto createdBooking = bookingService.create(booking1, user2.getId());
+
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(10))
+                .end(LocalDateTime.now().minusHours(1))
+                .itemId(item.getId())
+                .status(StatusOfBooking.WAITING)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking, user2.getId());
+        bookingService.approved(false, createdBooking2.getId(), user.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByBooker(State.REJECTED, user2.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(1);
+        assertEquals(foundBookings.stream().findFirst().get().getStatus(), StatusOfBooking.REJECTED);
+    }
+
+    @Test
     void shouldFindBookingByOwner() {
         //prepare
         BookingDto createdBooking = bookingService.create(booking1, user.getId());
@@ -157,6 +270,113 @@ class BookingServiceImplTest {
         assertNotNull(foundBookings);
         assertThat(foundBookings).hasSize(1);
         assertTrue(foundBookings.contains(createdBooking));
+    }
+
+    @Test
+    void shouldFindBookingByOwnerWhenStateCurrent() {
+        //prepare
+        BookingDto createdBooking = bookingService.create(booking1, user.getId());
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(1))
+                .end(LocalDateTime.now().plusHours(10))
+                .itemId(item.getId())
+                .status(StatusOfBooking.APPROVED)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking, user.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByOwner(State.CURRENT, user.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(2);
+        assertTrue(foundBookings.contains(createdBooking));
+        assertTrue(foundBookings.contains(createdBooking2));
+    }
+
+    @Test
+    void shouldFindBookingByOwnerWhenStatePast() {
+        //prepare
+        BookingDto createdBooking = bookingService.create(booking1, user.getId());
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(10))
+                .end(LocalDateTime.now().minusHours(1))
+                .itemId(item.getId())
+                .status(StatusOfBooking.APPROVED)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking, user.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByOwner(State.PAST, user.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(1);
+        assertTrue(foundBookings.contains(createdBooking2));
+    }
+
+    @Test
+    void shouldFindBookingByOwnerWhenStateFuture() {
+        //prepare
+        BookingDto createdBooking = bookingService.create(booking1, user.getId());
+        BookingDtoShort booking2 = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(10))
+                .end(LocalDateTime.now().minusHours(1))
+                .itemId(item.getId())
+                .status(StatusOfBooking.APPROVED)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking2, user.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByOwner(State.FUTURE, user.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(1);
+        assertTrue(foundBookings.contains(createdBooking));
+    }
+
+    @Test
+    void shouldFindBookingByOwnerWhenStateWaiting() {
+        //prepare
+        bookingService.create(booking1, user.getId());
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().minusHours(10))
+                .end(LocalDateTime.now().minusHours(1))
+                .itemId(item.getId())
+                .status(StatusOfBooking.WAITING)
+                .build();
+        bookingService.create(booking, user.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByOwner(State.WAITING, user.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(2);
+
+    }
+
+    @Test
+    void shouldFindBookingByOwnerWhenStateRejected() {
+        //prepare
+        bookingService.create(booking1, user.getId());
+        BookingDtoShort booking = BookingDtoShort.builder()
+                .start(LocalDateTime.now().plusHours(1))
+                .end(LocalDateTime.now().plusHours(10))
+                .itemId(item.getId())
+                .status(StatusOfBooking.WAITING)
+                .build();
+        BookingDto createdBooking2 = bookingService.create(booking, user.getId());
+        bookingService.approved(false, createdBooking2.getId(), user.getId());
+
+        //do
+        Collection<BookingDto> foundBookings = bookingService.findBookingByOwner(State.REJECTED, user.getId());
+
+        //check
+        assertNotNull(foundBookings);
+        assertThat(foundBookings).hasSize(1);
+        assertEquals(foundBookings.stream().findFirst().get().getStatus(), StatusOfBooking.REJECTED);
     }
 
     @Test
@@ -218,6 +438,16 @@ class BookingServiceImplTest {
 
         //check
         assertThatThrownBy(() -> bookingService.getBookingById(bookingTest.getId(), user2.getId()))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenIdNotFind() {
+        //prepare
+        bookingService.create(booking1, user.getId());
+
+        //check
+        assertThatThrownBy(() -> bookingService.getBookingById(null, user.getId()))
                 .isInstanceOf(ValidationException.class);
     }
 }

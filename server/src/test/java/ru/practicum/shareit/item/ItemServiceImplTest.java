@@ -10,6 +10,8 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.model.StatusOfBooking;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithRequestDto;
@@ -27,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -148,8 +150,8 @@ class ItemServiceImplTest {
                 .itemId(item.getId())
                 .status(StatusOfBooking.WAITING)
                 .build();
-        BookingDto createdBookingDto = bookingService.create(bookingDtoShort,user2.getId());
-        BookingDto approvedBookingDto = bookingService.approved(true,createdBookingDto.getId(),user.getId());
+        BookingDto createdBookingDto = bookingService.create(bookingDtoShort, user2.getId());
+        BookingDto approvedBookingDto = bookingService.approved(true, createdBookingDto.getId(), user.getId());
         Item i = ItemMapper.mapToItem(itemService.getItemById(item.getId(), user.getId()));
 
         CommentDto commentDto = CommentDto.builder()
@@ -166,5 +168,51 @@ class ItemServiceImplTest {
         assertThat(commentCreate.getId()).isEqualTo(1);
         assertThat(commentCreate.getText()).isEqualTo("comment");
         assertThat(commentCreate.getItem().getName()).isEqualTo("item test");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenNotGetItemById() {
+        //prepare
+        itemService.create(itemWithRequestDto, user.getId());
+
+        //check
+        assertThatThrownBy(() -> itemService.getItemById(1000L, user.getId()))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdateItemNotOwner() {
+        //prepare
+        ItemDto createdItem = itemService.create(itemWithRequestDto, user.getId());
+        Map<String, String> fields = new HashMap<>();
+        fields.put("name", "name");
+        fields.put("description", "description");
+        fields.put("available", "true");
+
+        UserDto userDto2 = UserDto.builder().id(2L).name("test2").email("test2@test.ru").build();
+        User user2 = UserMapper.mapToUser(userService.create(userDto2));
+        //check
+        assertThatThrownBy(() -> itemService.update(fields, createdItem.getId(), user2.getId()))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenIdNotFind() {
+        //prepare
+        itemService.create(itemWithRequestDto, user.getId());
+
+        //check
+        assertThatThrownBy(() -> itemService.getItemById(null,user.getId()))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFind() {
+        //prepare
+        ItemDto createdItem = itemService.create(itemWithRequestDto, user.getId());
+
+        //check
+        assertThatThrownBy(() -> itemService.getItemById(createdItem.getId(),-1L))
+                .isInstanceOf(NotFoundException.class);
     }
 }
