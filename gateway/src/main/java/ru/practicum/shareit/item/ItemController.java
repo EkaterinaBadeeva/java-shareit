@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import jakarta.validation.constraints.NotNull;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemWithRequestDto;
 import jakarta.validation.Valid;
@@ -59,7 +60,7 @@ public class ItemController {
     //GET /items/search?text={text}
     // поиск вещи потенциальным арендатором
     @GetMapping("/search")
-    public ResponseEntity<Object> searchItem(@Valid @RequestParam String text) {
+    public ResponseEntity<Object> searchItem(@Valid @NotNull(message = "Текст поиска должен быть указан.") @RequestParam String text) {
          log.info("Поиск вещи потенциальным арендатором");
         return itemClient.searchItem(text);
     }

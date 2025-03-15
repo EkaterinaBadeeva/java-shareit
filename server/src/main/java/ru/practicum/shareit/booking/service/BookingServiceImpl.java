@@ -40,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
         checkId(userId);
 
         Booking booking = BookingMapper.mapToBookingShort(bookingDto);
-        checkDateOfBooking(booking);
+
         Item item = ItemMapper.mapToItem(itemService.getItemById(bookingDto.getItemId(), userId));
         checkAvailableOfItem(item);
 
@@ -187,17 +187,6 @@ public class BookingServiceImpl implements BookingService {
             log.warn("Неверно указан Id пользователя.");
             throw new NotFoundException("Пользователь с Id = " + userId + " не найден");
 
-        }
-    }
-
-    private void checkDateOfBooking(Booking booking) {
-        LocalDateTime start = booking.getStart();
-        LocalDateTime end = booking.getEnd();
-
-        if (start.isAfter(end)) {
-            throw new ValidationException("Дата и время начала бронирования позже даты и времени конца бронирования");
-        } else if (start.equals(end)) {
-            throw new ValidationException("Дата и время начала бронирования равна дате и времени конца бронирования");
         }
     }
 

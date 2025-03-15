@@ -380,23 +380,6 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenWrongDateOfBooking() {
-        //prepare
-        LocalDateTime start = LocalDateTime.of(2222, 2, 2, 22, 22);
-        LocalDateTime end = LocalDateTime.of(2000, 2, 2, 22, 22);
-        booking2 = BookingDtoShort.builder()
-                .start(start)
-                .end(end)
-                .itemId(item.getId())
-                .status(StatusOfBooking.WAITING)
-                .build();
-
-        //check
-        assertThatThrownBy(() -> bookingService.create(booking2, user.getId()))
-                .isInstanceOf(ValidationException.class);
-    }
-
-    @Test
     void shouldThrowExceptionWhenItemIsNotAvailable() {
         //prepare
         LocalDateTime start = LocalDateTime.of(2025, 2, 2, 22, 22);

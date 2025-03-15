@@ -48,7 +48,7 @@ public class ItemClient extends BaseClient {
     //PATCH /items/{itemId}
     // отредактировать вещь
     public ResponseEntity<Object> update(Map<String, String> fields, Long itemId, Long userId) {
-        return post("/" + itemId, userId, fields);
+        return patch("/" + itemId, userId, fields);
     }
 
     //GET /items/search?text={text}

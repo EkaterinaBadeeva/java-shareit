@@ -148,13 +148,13 @@ public class ItemServiceImpl implements ItemService {
         checkId(userId);
         checkUser(userId);
         Long requestId = itemDto.getRequestId();
-        Optional<ItemRequest> requestOpt = Optional.empty();
 
+        ItemRequest request = null;
         if (requestId != null) {
-            requestOpt = itemRequestRepository.findById(requestId);
+            request = itemRequestRepository.findById(requestId).orElseThrow(() -> new NotFoundException("Запрос не найден"));
         }
 
-        Item item = ItemMapper.mapToItemWithRequest(itemDto, requestOpt.orElse(null));
+        Item item = ItemMapper.mapToItemWithRequest(itemDto, request);
 
         item.setOwner(UserMapper.mapToUser(userService.findUserById(userId)));
         item = itemRepository.save(item);
@@ -198,11 +198,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> searchItem(String text) {
         log.info("Поиск вещи потенциальным арендатором");
-
-        if (text == null) {
-            log.warn("Текст поиска должен быть указан.");
-            throw new ValidationException("Текст поиска должен быть указан");
-        }
 
         if (text.isEmpty()) {
             return List.of();

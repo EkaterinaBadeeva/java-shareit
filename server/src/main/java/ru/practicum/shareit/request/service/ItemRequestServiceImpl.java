@@ -40,6 +40,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("Добавление нового запроса на вещь.");
         checkId(userId);
 
+        if (itemRequestDto.getDescription().isEmpty()) {
+            log.warn("Текст запроса, содержащий описание требуемой вещи пустой");
+            throw new ValidationException("Текст запроса, содержащий описание требуемой вещи пустой");
+        }
+
         User requestor = UserMapper.mapToUser(userService.findUserById(userId));
         ItemRequest itemRequest = ItemRequestMapper.mapToItemRequest(itemRequestDto);
         itemRequest.setRequestor(requestor);
