@@ -4,10 +4,12 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import ru.practicum.shareit.validator.StartBeforeEnd;
 
 import java.time.LocalDateTime;
 
 @Getter
+@StartBeforeEnd
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingDtoShort {
